@@ -6,10 +6,9 @@ class AbstractBaseTestCase:
 
     __metaclass__ = ABCMeta
 
-    def __init__(self, dicConfig, moduleName, testCaseID):
+    def __init__(self, dicConfig, testCaseConfig):
         self.dicConfig = dicConfig
-        self.moduleName = moduleName
-        self.testCaseID = testCaseID
+        self.testCaseConfig = testCaseConfig
 
     def setUp(self):
         print 'setUp...'

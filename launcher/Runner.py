@@ -1,6 +1,7 @@
 __author__ = 'Tails'
 
 from openpyxl import load_workbook
+from testCases.TestCaseConfig import TestCaseConfig
 
 class Runner:
 
@@ -9,12 +10,10 @@ class Runner:
 
     def run(self):
         dicConfig = self.getConfigDic('config/config.xlsx')
-        testCases = self.getAllTestCases('config/Automation_Test_Suite.xlsx')
-        for testCase in testCases:
-            moduleName = testCase.split('.')[0]
-            testCaseID = testCase.split('.')[1]
-            exec 'from testCases.%s.%s import %s' % (moduleName, testCaseID, testCaseID)
-            testCaseInstance = eval(testCaseID)(dicConfig, moduleName, testCaseID)
+        lstAllTestCaseConfig = self.getAllTestCases('config/Automation_Test_Suite.xlsx')
+        for testCaseConfig in lstAllTestCaseConfig:
+            exec 'from testCases.%s.%s import %s' % (testCaseConfig.moduleName, testCaseConfig.testCaseID, testCaseConfig.testCaseID)
+            testCaseInstance = eval(testCaseConfig.testCaseID)(dicConfig, testCaseConfig)
             testCaseInstance.setUp()
             testCaseInstance.run()
             testCaseInstance.tearDown()
@@ -62,9 +61,10 @@ class Runner:
     def getAllTestCases(self, fileName):
         """
         :param fileName:
-        :return: A tuple contains all testcase names (module.testCaseID) to be run
+        :return: A list contains all testcase (testCaseConfig) to be run
         """
         lstAllTestCases = []
+        lstAllTestCaseConfig = []
         wb = load_workbook(filename=fileName, read_only=True)
         lstSheetNames = wb.get_sheet_names()
         for sheetName in lstSheetNames:
@@ -80,9 +80,7 @@ class Runner:
                     lstCurrSheetTestCases.append(currTestCase)
             if len(lstCurrSheetTestCases) > 0:
                 lstAllTestCases += lstCurrSheetTestCases
-
-        lstAllFormatTestCases = []
         for testCase in lstAllTestCases:
-            lstAllFormatTestCases.append(testCase[1] + '.' + testCase[2])
-        print tuple(lstAllFormatTestCases)
-        return tuple(lstAllFormatTestCases)
+            currTestCaseConfig = TestCaseConfig(testCase[0], testCase[1], testCase[2])  #sheetName, moduleName, testCaseID
+            lstAllTestCaseConfig.append(currTestCaseConfig)
+        return lstAllTestCaseConfig

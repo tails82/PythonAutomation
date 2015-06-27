@@ -4,11 +4,11 @@ from  testCases.AbstractBaseTestCase import AbstractBaseTestCase
 
 class Demo_01_02(AbstractBaseTestCase):
 
-    def __init__(self, dicConfig, moduleName, testCaseID):
-        AbstractBaseTestCase.__init__(self, dicConfig, moduleName, testCaseID)
+    def __init__(self, dicConfig, testCaseConfig):
+        AbstractBaseTestCase.__init__(self, dicConfig, testCaseConfig)
 
     def run(self):
-        print self.__class__.__name__ +  " is runnung..."
+        print self.testCaseConfig.testCaseID +  " is runnung..."
         print 'open url: ' + self.dicConfig['Login Site']
         print 'input userName: ' + self.dicConfig['B2B User Name']
         print 'input userName: ' + self.dicConfig['B2B User Password']
