@@ -1,12 +1,17 @@
 __author__ = 'Tails'
 
+from openpyxl import Workbook
 from openpyxl import load_workbook
 from testCases.TestCaseConfig import TestCaseConfig
+import sys
+import traceback
+import time
+import os
 
 class Runner:
 
     def __init__(self):
-        pass
+        self.lstRunResult = []
 
     def run(self):
         dicConfig = self.getConfigDic('config/config.xlsx')
@@ -14,10 +19,19 @@ class Runner:
         for testCaseConfig in lstAllTestCaseConfig:
             exec 'from testCases.%s.%s import %s' % (testCaseConfig.moduleName, testCaseConfig.testCaseID, testCaseConfig.testCaseID)
             testCaseInstance = eval(testCaseConfig.testCaseID)(dicConfig, testCaseConfig)
-            testCaseInstance.setUp()
-            testCaseInstance.run()
-            testCaseInstance.tearDown()
-
+            try:
+                testCaseInstance.setUp()
+                testCaseInstance.run()
+            except Exception as ex:
+                #save screen shot when failed
+                testCaseInstance.saveScreenShot()
+                testCaseInstance.allPassed = False
+                testCaseConfig.testCaseRunResult = "Failed"
+                traceback.print_exc(file=sys.stdout)
+            finally:
+                testCaseInstance.tearDown()
+                self.saveTestResult(testCaseConfig)
+        self.outputResult(testCaseInstance)
 
     def getConfigDic(self, fileName):
          wb = load_workbook(filename=fileName, read_only=True)
@@ -84,3 +98,43 @@ class Runner:
             currTestCaseConfig = TestCaseConfig(testCase[0], testCase[1], testCase[2])  #sheetName, moduleName, testCaseID
             lstAllTestCaseConfig.append(currTestCaseConfig)
         return lstAllTestCaseConfig
+
+    def saveTestResult(self, testCaseConfig):
+        tupleRunResult = (testCaseConfig.sheetName, testCaseConfig.moduleName, testCaseConfig.testCaseID, testCaseConfig.testCaseRunResult)
+        self.lstRunResult.append(tupleRunResult)
+
+    def outputResult(self, testCaseInstance):
+        """
+        Write test case run result(pass, failed) to excel file
+        :param lstTestResult:
+        :return:
+        """
+        #create a folder with timestamp to save current test run result
+        currDateTime = time.strftime("%Y%m%d%H%M%S",time.localtime(time.time()))
+        currDir = os.getcwd()
+        runResultDir = currDir + os.path.sep + testCaseInstance.dicConfig['Test Result Folder'] + os.path.sep +  currDateTime
+        os.mkdir(runResultDir)
+
+        #create excel file and write test result in
+        resultFileName = runResultDir + os.path.sep + 'RunResult.xlsx'
+        wb = Workbook()
+        previousCaseSheetName = ''
+        rowIndex = 0;
+        for runResult in self.lstRunResult:
+            #runResult (sheetName, moduleName, testCaseID, runResult)
+            currCaseModuleName = runResult[0]
+            #first sheet
+            if previousCaseSheetName == "":
+                ws = wb.active
+                ws.title = currCaseModuleName
+            #start another sheet
+            elif not previousCaseSheetName == currCaseModuleName:
+                ws = wb.create_sheet(title=currCaseModuleName)
+                #reset row index in a new sheet
+                rowIndex = 0
+            rowIndex += 1
+            ws['A' + str(rowIndex)] = runResult[1]
+            ws['B' + str(rowIndex)] = runResult[2]
+            ws['C' + str(rowIndex)] = runResult[3]
+            previousCaseSheetName = currCaseModuleName
+        wb.save(filename=resultFileName)
