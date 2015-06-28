@@ -5,3 +5,4 @@ class TestCaseConfig:
         self.sheetName = sheetName
         self.moduleName = moduleName
         self.testCaseID = testCaseID
+        self.testCaseRunResult = 'Passed'
