@@ -11,6 +11,8 @@ class AbstractBasePage:
     def __init__(self, driver):
         self.driver = driver
         assert_true(self.isLoad(),self.__class__.__name__ + " is not load!" )
+        #this function is to be implement in each page class
+        self.initialXPATH()
 
     def isLoad(self):
         try:
@@ -21,4 +23,8 @@ class AbstractBasePage:
     #This function will be implement by sub class
     @abstractmethod
     def isTargetPage(self):
+        pass
+
+    @abstractmethod
+    def initialXPATH(self):
         pass
