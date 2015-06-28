@@ -1,6 +1,6 @@
 __author__ = 'Tails'
 
-from  testCases.AbstractBaseTestCase import AbstractBaseTestCase
+from testCases.AbstractBaseTestCase import AbstractBaseTestCase
 
 class Demo_01_02(AbstractBaseTestCase):
 
