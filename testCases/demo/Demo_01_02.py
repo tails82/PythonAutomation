@@ -9,6 +9,6 @@ class Demo_01_02(AbstractBaseTestCase):
 
     def run(self):
         print self.testCaseConfig.testCaseID +  " is runnung..."
-        print 'open url: ' + self.dicConfig['Login Site']
+        print 'open url: ' + self.dicConfig['Login Main Site']
         print 'input userName: ' + self.dicConfig['B2B User Name']
         print 'input userName: ' + self.dicConfig['B2B User Password']
