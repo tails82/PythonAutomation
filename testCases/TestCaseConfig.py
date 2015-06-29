@@ -6,3 +6,5 @@ class TestCaseConfig:
         self.moduleName = moduleName
         self.testCaseID = testCaseID
         self.testCaseRunResult = 'Passed'
+        self.timeElapsedSec = 0
+        self.failureMessage = None

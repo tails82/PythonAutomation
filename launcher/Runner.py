@@ -3,10 +3,12 @@ __author__ = 'Tails'
 from openpyxl import Workbook
 from openpyxl import load_workbook
 from testCases.TestCaseConfig import TestCaseConfig
+from junit_xml import TestSuite, TestCase
 import sys
 import traceback
 import time
 import os
+
 
 class Runner:
 
@@ -15,7 +17,7 @@ class Runner:
 
     def run(self):
         dicConfig = self.getConfigDic('config/config.xlsx')
-        lstAllTestCaseConfig = self.getAllTestCases('config/Automation_Test_Suite.xlsx')
+        lstAllTestCaseConfig = self.getAllTestCases(dicConfig, 'config/Automation_Test_Suite.xlsx')
         for testCaseConfig in lstAllTestCaseConfig:
             exec 'from testCases.%s.%s import %s' % (testCaseConfig.moduleName, testCaseConfig.testCaseID, testCaseConfig.testCaseID)
             testCaseInstance = eval(testCaseConfig.testCaseID)(dicConfig, testCaseConfig)
@@ -72,7 +74,7 @@ class Runner:
              rowId += 1
          return dicConfig
 
-    def getAllTestCases(self, fileName):
+    def getAllTestCases(self, dicConfig, fileName):
         """
         :param fileName:
         :return: A list contains all testcase (testCaseConfig) to be run
@@ -80,27 +82,24 @@ class Runner:
         lstAllTestCases = []
         lstAllTestCaseConfig = []
         wb = load_workbook(filename=fileName, read_only=True)
-        lstSheetNames = wb.get_sheet_names()
-        for sheetName in lstSheetNames:
-            lstCurrSheetTestCases = []
-            ws = wb[sheetName]
+        sheetName = dicConfig['Test Suite']
+        lstAllTestCases = []
+        ws = wb[sheetName]
+        currTestCase = []
+        for row in ws.rows:
             currTestCase = []
-            for row in ws.rows:
-                currTestCase = []
-                currTestCase.append(sheetName)
-                for cell in row:
-                    currTestCase.append(cell.value)
-                if currTestCase[3] == 'Run':
-                    lstCurrSheetTestCases.append(currTestCase)
-            if len(lstCurrSheetTestCases) > 0:
-                lstAllTestCases += lstCurrSheetTestCases
+            currTestCase.append(sheetName)
+            for cell in row:
+                currTestCase.append(cell.value)
+            if currTestCase[3] == 'Run':
+                lstAllTestCases.append(currTestCase)
         for testCase in lstAllTestCases:
             currTestCaseConfig = TestCaseConfig(testCase[0], testCase[1], testCase[2])  #sheetName, moduleName, testCaseID
             lstAllTestCaseConfig.append(currTestCaseConfig)
         return lstAllTestCaseConfig
 
     def saveTestResult(self, testCaseConfig):
-        tupleRunResult = (testCaseConfig.sheetName, testCaseConfig.moduleName, testCaseConfig.testCaseID, testCaseConfig.testCaseRunResult)
+        tupleRunResult = (testCaseConfig.sheetName, testCaseConfig.moduleName, testCaseConfig.testCaseID, testCaseConfig.testCaseRunResult, testCaseConfig.timeElapsedSec, testCaseConfig.failureMessage)
         self.lstRunResult.append(tupleRunResult)
 
     def outputResult(self, testCaseInstance):
@@ -114,14 +113,17 @@ class Runner:
         currDir = os.getcwd()
         runResultDir = currDir + os.path.sep + testCaseInstance.dicConfig['Test Result Folder'] + os.path.sep +  currDateTime
         os.mkdir(runResultDir)
+        self.generateExcelReport(self.lstRunResult, runResultDir)
+        self.generateJUnitReport(self.lstRunResult, runResultDir)
 
-        #create excel file and write test result in
+    def generateExcelReport(self, lstRunResult, runResultDir):
+         #create excel file and write test result in
         resultFileName = runResultDir + os.path.sep + 'RunResult.xlsx'
         wb = Workbook()
         previousCaseSheetName = ''
-        rowIndex = 0;
-        for runResult in self.lstRunResult:
-            #runResult (sheetName, moduleName, testCaseID, runResult)
+        rowIndex = 0
+        for runResult in lstRunResult:
+            #runResult (sheetName, moduleName, testCaseID, runResult, timeElapsedSec, failureMessage)
             currCaseModuleName = runResult[0]
             #first sheet
             if previousCaseSheetName == "":
@@ -138,3 +140,29 @@ class Runner:
             ws['C' + str(rowIndex)] = runResult[3]
             previousCaseSheetName = currCaseModuleName
         wb.save(filename=resultFileName)
+
+    def generateJUnitReport(self, lstRunResult, runResultDir):
+        #create junit xml report file use junit-xml 1.4
+        resultFileName = runResultDir + os.path.sep + 'RunResult.xml'
+        previousCaseModuleName = ''
+        rowIndex = 0
+        lstTestSuites = []
+        testSuite = []
+        for runResult in lstRunResult:
+            #runResult (sheetName, moduleName, testCaseID, runResult, timeElapsedSec, failureMessage)
+            #test
+            testCaseName = runResult[2]
+            className = runResult[1] + '.' + runResult[2]
+            timeElapsedSec = runResult[4]
+            failureMessage = runResult[5]
+            testCase = TestCase(testCaseName, className, timeElapsedSec)
+            testCase.add_failure_info(None, failureMessage)
+            currTestCaseModuleName = runResult[1]
+            if not currTestCaseModuleName == previousCaseModuleName:
+                testSuite = TestSuite(currTestCaseModuleName)
+                lstTestSuites.append(testSuite)
+            testSuite.test_cases.append(testCase)
+        print TestSuite.to_xml_string(lstTestSuites)
+
+# pretty printing is on by default but can be disabled using prettyprint=False
+#print(TestSuite.to_xml_string([ts]))
