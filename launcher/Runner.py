@@ -111,10 +111,11 @@ class Runner:
         #create a folder with timestamp to save current test run result
         currDateTime = time.strftime("%Y%m%d%H%M%S",time.localtime(time.time()))
         currDir = os.getcwd()
-        runResultDir = currDir + os.path.sep + testCaseInstance.dicConfig['Test Result Folder'] + os.path.sep +  currDateTime
+        resultDir = currDir + os.path.sep + testCaseInstance.dicConfig['Test Result Folder']
+        runResultDir = resultDir + os.path.sep +  currDateTime
         os.mkdir(runResultDir)
         self.generateExcelReport(self.lstRunResult, runResultDir)
-        self.generateJUnitReport(self.lstRunResult, runResultDir)
+        self.generateJUnitReport(self.lstRunResult, resultDir)
 
     def generateExcelReport(self, lstRunResult, runResultDir):
          #create excel file and write test result in
@@ -162,7 +163,7 @@ class Runner:
                 testSuite = TestSuite(currTestCaseModuleName)
                 lstTestSuites.append(testSuite)
             testSuite.test_cases.append(testCase)
-        print TestSuite.to_xml_string(lstTestSuites)
-
-# pretty printing is on by default but can be disabled using prettyprint=False
-#print(TestSuite.to_xml_string([ts]))
+        #print TestSuite.to_xml_string(lstTestSuites)
+        #Write the xml content to result file
+        with open(runResultDir + os.path.sep + 'Result.xml', 'w') as f:
+            TestSuite.to_file(f, lstTestSuites)
