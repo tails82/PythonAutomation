@@ -30,6 +30,7 @@ class Runner:
                 testCaseInstance.allPassed = False
                 testCaseConfig.testCaseRunResult = "Failed"
                 traceback.print_exc(file=sys.stdout)
+                testCaseConfig.failureMessage = ex.message
             finally:
                 testCaseInstance.tearDown()
                 self.saveTestResult(testCaseConfig)
