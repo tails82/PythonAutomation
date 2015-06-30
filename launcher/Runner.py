@@ -144,7 +144,7 @@ class Runner:
         wb.save(filename=resultFileName)
 
     def generateJUnitReport(self, lstRunResult, runResultDir):
-        #create junit xml report file use junit-xml 1.4
+        #create junit xml report file use junit-xml 1.4   pip install junit-xml
         resultFileName = runResultDir + os.path.sep + 'RunResult.xml'
         previousCaseModuleName = ''
         rowIndex = 0
