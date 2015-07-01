@@ -3,7 +3,8 @@ __author__ = 'Tails'
 from openpyxl import Workbook
 from openpyxl import load_workbook
 from testCases.TestCaseConfig import TestCaseConfig
-from junit_xml import TestSuite, TestCase
+import junit_xml
+import common.nunit_xml
 import sys
 import traceback
 import time
@@ -117,6 +118,7 @@ class Runner:
         os.mkdir(runResultDir)
         self.generateExcelReport(self.lstRunResult, runResultDir)
         self.generateJUnitReport(self.lstRunResult, resultDir)
+        self.generateNunitReport(self.lstRunResult, resultDir)
 
     def generateExcelReport(self, lstRunResult, runResultDir):
          #create excel file and write test result in
@@ -157,14 +159,39 @@ class Runner:
             className = runResult[1] + '.' + runResult[2]
             timeElapsedSec = runResult[4]
             failureMessage = runResult[5]
-            testCase = TestCase(testCaseName, className, timeElapsedSec)
+            testCase = junit_xml.TestCase(testCaseName, className, timeElapsedSec)
             testCase.add_failure_info(None, failureMessage)
             currTestCaseModuleName = runResult[1]
             if not currTestCaseModuleName == previousCaseModuleName:
-                testSuite = TestSuite(currTestCaseModuleName)
+                testSuite = junit_xml.TestSuite(currTestCaseModuleName)
                 lstTestSuites.append(testSuite)
             testSuite.test_cases.append(testCase)
         #print TestSuite.to_xml_string(lstTestSuites)
         #Write the xml content to result file
-        with open(runResultDir + os.path.sep + 'Result.xml', 'w') as f:
-            TestSuite.to_file(f, lstTestSuites)
+        with open(runResultDir + os.path.sep + 'JUnitResult.xml', 'w') as f:
+            junit_xml.TestSuite.to_file(f, lstTestSuites)
+
+    def generateNunitReport(self, lstRunResult, runResultDir):
+        resultFileName = runResultDir + os.path.sep + 'RunResult.xml'
+        previousCaseModuleName = ''
+        rowIndex = 0
+        lstTestSuites = []
+        testSuite = []
+        for runResult in lstRunResult:
+            #runResult (sheetName, moduleName, testCaseID, runResult, timeElapsedSec, failureMessage)
+            #test
+            testCaseName = runResult[2]
+            time = runResult[4]
+            failureMessage = runResult[5]
+            failureStackTrace = None
+            testCase = common.nunit_xml.TestCase(testCaseName, time)
+            testCase.add_failure_info(failureMessage, failureStackTrace)
+            currTestCaseModuleName = runResult[1]
+            if not currTestCaseModuleName == previousCaseModuleName:
+                testSuite = common.nunit_xml.TestSuite(currTestCaseModuleName)
+                lstTestSuites.append(testSuite)
+            testSuite.test_cases.append(testCase)
+        #print common.nunit_xml.TestSuite.to_xml_string(lstTestSuites)
+        #Write the xml content to result file
+        with open(runResultDir + os.path.sep + 'NUnitResult.xml', 'w') as f:
+            common.nunit_xml.TestSuite.to_file(f, lstTestSuites)
