@@ -70,7 +70,7 @@ class TestSuite(object):
                 test_case_failure_message_element.text = case.failure_message
                 test_case_failure_stackTrace_element = ET.SubElement(test_case_failure_element, 'stack-trace')
                 test_case_failure_stackTrace_element.text = case.failure_stackTrace
-                
+
         return xml_element
 
     @staticmethod

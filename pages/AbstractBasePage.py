@@ -1,18 +1,21 @@
+from selenium.webdriver.common import by
+
 __author__ = 'Tails'
 
 from abc import ABCMeta, abstractmethod
 from nose.tools import *
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.by import By
+from page_objects import PageObject
 
-class AbstractBasePage:
+class AbstractBasePage(PageObject):
 
     __metaclass__ = ABCMeta
 
     def __init__(self, driver):
-        self.driver = driver
+        # Don't change the variable name w. it's used by PageObject
+        self.w = driver
         assert_true(self.isLoad(),self.__class__.__name__ + " is not load!" )
-        #this function is to be implement in each page class
-        self.initialXPATH()
 
     def isLoad(self):
         try:
@@ -25,6 +28,5 @@ class AbstractBasePage:
     def isTargetPage(self):
         pass
 
-    @abstractmethod
-    def initialXPATH(self):
-        pass
+    def isElementDisplayed(self, by, value):
+        return self.driver.find_element(by, value).is_displayed()
