@@ -31,6 +31,7 @@ class Runner:
                 testCaseInstance.allPassed = False
                 testCaseConfig.testCaseRunResult = "Failed"
                 traceback.print_exc(file=sys.stdout)
+                testCaseConfig.failureStackTrace = traceback.format_exc()
                 testCaseConfig.failureMessage = ex.message
             finally:
                 testCaseInstance.tearDown()
@@ -101,7 +102,8 @@ class Runner:
         return lstAllTestCaseConfig
 
     def saveTestResult(self, testCaseConfig):
-        tupleRunResult = (testCaseConfig.sheetName, testCaseConfig.moduleName, testCaseConfig.testCaseID, testCaseConfig.testCaseRunResult, testCaseConfig.timeElapsedSec, testCaseConfig.failureMessage)
+        tupleRunResult = (testCaseConfig.sheetName, testCaseConfig.moduleName, testCaseConfig.testCaseID, testCaseConfig.testCaseRunResult,
+                          testCaseConfig.timeElapsedSec, testCaseConfig.failureMessage, testCaseConfig.failureStackTrace)
         self.lstRunResult.append(tupleRunResult)
 
     def outputResult(self, testCaseInstance):
@@ -127,7 +129,7 @@ class Runner:
         previousCaseSheetName = ''
         rowIndex = 0
         for runResult in lstRunResult:
-            #runResult (sheetName, moduleName, testCaseID, runResult, timeElapsedSec, failureMessage)
+            #runResult (sheetName, moduleName, testCaseID, runResult, timeElapsedSec, failureMessage, failureStackTrace)
             currCaseModuleName = runResult[0]
             #first sheet
             if previousCaseSheetName == "":
@@ -153,12 +155,13 @@ class Runner:
         lstTestSuites = []
         testSuite = []
         for runResult in lstRunResult:
-            #runResult (sheetName, moduleName, testCaseID, runResult, timeElapsedSec, failureMessage)
+            #runResult (sheetName, moduleName, testCaseID, runResult, timeElapsedSec, failureMessage, failureStackTrace)
             #test
             testCaseName = runResult[2]
             className = runResult[1] + '.' + runResult[2]
             timeElapsedSec = runResult[4]
             failureMessage = runResult[5]
+            failureStackTrace = runResult[6]
             testCase = junit_xml.TestCase(testCaseName, className, timeElapsedSec)
             testCase.add_failure_info(None, failureMessage)
             currTestCaseModuleName = runResult[1]
@@ -178,14 +181,14 @@ class Runner:
         lstTestSuites = []
         testSuite = []
         for runResult in lstRunResult:
-            #runResult (sheetName, moduleName, testCaseID, runResult, timeElapsedSec, failureMessage)
+            #runResult (sheetName, moduleName, testCaseID, runResult, timeElapsedSec, failureMessage, failureStackTrace)
             #test
             testCaseName = runResult[2]
             time = runResult[4]
             failureMessage = runResult[5]
-            failureStackTrace = None
+            failureStackTrace = runResult[6]
             testCase = common.nunit_xml.TestCase(testCaseName, time)
-            testCase.add_failure_info(failureMessage, failureStackTrace)
+            testCase.add_failure_info(message=failureMessage, stackTrace=failureStackTrace)
             currTestCaseModuleName = runResult[1]
             if not currTestCaseModuleName == previousCaseModuleName:
                 testSuite = common.nunit_xml.TestSuite(currTestCaseModuleName)

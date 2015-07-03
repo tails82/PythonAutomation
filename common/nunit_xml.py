@@ -130,7 +130,7 @@ class TestCase(object):
     def add_failure_info(self, message=None, stackTrace=None):
         if message:
             self.failure_message = message
-        if self.failure_stackTrace:
+        if stackTrace:
             self.failure_stackTrace = stackTrace
 
     def is_failure(self):

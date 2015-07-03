@@ -8,3 +8,4 @@ class TestCaseConfig:
         self.testCaseRunResult = 'Passed'
         self.timeElapsedSec = 0
         self.failureMessage = None
+        self.failureStackTrace = None
