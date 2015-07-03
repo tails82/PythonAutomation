@@ -18,4 +18,3 @@ class Demo_01_01(AbstractBaseTestCase):
         loginMainPage.setUserName(loginUserName)
         loginMainPage.setPassword(loginPassword)
         loginMainPage.clickLoginButton()
-        self.driver.find_element_by_xpath()
