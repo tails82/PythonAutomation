@@ -1,6 +1,7 @@
 __author__ = 'Tails'
 
 from testCases.AbstractBaseTestCase import AbstractBaseTestCase
+from pages.LoginMainPage import  LoginMainPage
 
 class Demo_01_01(AbstractBaseTestCase):
 
@@ -9,6 +10,12 @@ class Demo_01_01(AbstractBaseTestCase):
 
     def run(self):
         print self.testCaseConfig.testCaseID +  " is runnung..."
-        print 'open url: ' + self.dicConfig['Login Main Site']
-        print 'input userName: ' + self.dicConfig['B2B User Name']
-        print 'input userName: ' + self.dicConfig['B2B User Password']
+        loginUrl = self.dicConfig['Login Main Site']
+        loginUserName = self.dicConfig['B2B User Name']
+        loginPassword = self.dicConfig['B2B User Password']
+        self.driver.get(loginUrl)
+        loginMainPage = LoginMainPage(self.driver)
+        loginMainPage.setUserName(loginUserName)
+        loginMainPage.setPassword(loginPassword)
+        loginMainPage.clickLoginButton()
+        self.driver.find_element_by_xpath()
