@@ -19,6 +19,7 @@ class LoginMainPage(AbstractBasePage):
 
 
     def setUserName(self, userName):
+        self.logger.info('setUserName is started')
         self.txtUserName.clear()
         self.txtUserName.send_keys(userName)
 

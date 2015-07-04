@@ -3,6 +3,7 @@ __author__ = 'Tails'
 import os
 from abc import ABCMeta, abstractmethod
 from selenium import webdriver
+import launcher.Logger
 
 class AbstractBaseTestCase:
 
@@ -11,6 +12,7 @@ class AbstractBaseTestCase:
     def __init__(self, dicConfig, testCaseConfig):
         self.dicConfig = dicConfig
         self.testCaseConfig = testCaseConfig
+        self.logger = launcher.Logger.logger
 
     def setUp(self):
         #Set initial test case pass/fail status
@@ -44,3 +46,9 @@ class AbstractBaseTestCase:
         fileName = self.testCaseConfig.moduleName + "_" + self.testCaseConfig.testCaseID + ".jpg"
         fullFilePathName = failedScreenShotDir + os.path.sep + fileName
         self.driver.get_screenshot_as_file(fullFilePathName)
+
+    # def getLogger(self):
+    #     return self.logger
+    #
+    # def setLogger(self, logger):
+    #     self.logger = logger

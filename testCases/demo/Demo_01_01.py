@@ -9,7 +9,7 @@ class Demo_01_01(AbstractBaseTestCase):
         AbstractBaseTestCase.__init__(self, dicConfig, testCaseConfig)
 
     def run(self):
-        print self.testCaseConfig.testCaseID +  " is runnung..."
+        self.logger.info(self.testCaseConfig.testCaseID +  " is runnung...")
         loginUrl = self.dicConfig['Login Main Site']
         loginUserName = self.dicConfig['B2B User Name']
         loginPassword = self.dicConfig['B2B User Password']

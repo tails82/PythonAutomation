@@ -7,16 +7,18 @@ from nose.tools import *
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from page_objects import PageObject
+import launcher.Logger
 
 class AbstractBasePage(PageObject):
 
     __metaclass__ = ABCMeta
 
     def __init__(self, driver):
+        #get logger from module Logger
+        self.logger = launcher.Logger.logger
         # Don't change the variable name w. it's used by PageObject
         self.w = driver
         assert_true(self.isLoad(),self.__class__.__name__ + " is not load!" )
-
     def isLoad(self):
         try:
             return self.isTargetPage()

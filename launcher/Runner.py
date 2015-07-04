@@ -9,7 +9,8 @@ import sys
 import traceback
 import time
 import os
-
+import logging
+import Logger
 
 class Runner:
 
@@ -17,8 +18,10 @@ class Runner:
         self.lstRunResult = []
 
     def run(self):
+        self.currDateTime = time.strftime("%Y%m%d%H%M%S",time.localtime(time.time()))
         dicConfig = self.getConfigDic('config/config.xlsx')
         lstAllTestCaseConfig = self.getAllTestCases(dicConfig, 'config/Automation_Test_Suite.xlsx')
+        Logger.logger = self.initailLogger(dicConfig)
         for testCaseConfig in lstAllTestCaseConfig:
             exec 'from testCases.%s.%s import %s' % (testCaseConfig.moduleName, testCaseConfig.testCaseID, testCaseConfig.testCaseID)
             testCaseInstance = eval(testCaseConfig.testCaseID)(dicConfig, testCaseConfig)
@@ -113,10 +116,9 @@ class Runner:
         :return:
         """
         #create a folder with timestamp to save current test run result
-        currDateTime = time.strftime("%Y%m%d%H%M%S",time.localtime(time.time()))
         currDir = os.getcwd()
         resultDir = currDir + os.path.sep + testCaseInstance.dicConfig['Test Result Folder']
-        runResultDir = resultDir + os.path.sep +  currDateTime
+        runResultDir = resultDir + os.path.sep +  self.currDateTime
         os.mkdir(runResultDir)
         self.generateExcelReport(self.lstRunResult, runResultDir)
         self.generateJUnitReport(self.lstRunResult, resultDir)
@@ -198,3 +200,16 @@ class Runner:
         #Write the xml content to result file
         with open(runResultDir + os.path.sep + 'NUnitResult.xml', 'w') as f:
             common.nunit_xml.TestSuite.to_file(f, lstTestSuites)
+
+    def initailLogger(self, dicConfig):
+        currDateTime = time.strftime("%Y%m%d%H%M%S",time.localtime(time.time()))
+        currDir = os.getcwd()
+        resultDir = currDir + os.path.sep + dicConfig['Log Folder']
+        logFileName = resultDir + os.path.sep + "Log" + currDateTime + ".log"
+        logging.basicConfig(level=logging.INFO,
+                            format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+                            datefmt='%a, %d %b %Y %H:%M:%S',
+                            filename=logFileName,
+                            filemode='w')
+        logger = logging.getLogger()
+        return logging.getLogger()
