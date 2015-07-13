@@ -1,0 +1,4 @@
+#LWP-Cookies-2.0
+Set-Cookie3: EFID="C5F4F549-3DCF-4FB3-BB87-26523F0B1505"; path="/"; domain=".englishtown.com"; path_spec; expires="2018-04-04 13:29:47Z"; version=0
+Set-Cookie3: ctr=cn; path="/"; domain=".englishtown.com"; path_spec; expires="2018-04-04 13:29:45Z"; version=0
+Set-Cookie3: lng=cs; path="/"; domain=".englishtown.com"; path_spec; expires="2018-04-04 13:29:45Z"; version=0
