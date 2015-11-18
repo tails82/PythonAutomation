@@ -35,7 +35,7 @@ class Runner:
                 testCaseConfig.testCaseRunResult = "Failed"
                 traceback.print_exc(file=sys.stdout)
                 testCaseConfig.failureStackTrace = traceback.format_exc()
-                testCaseConfig.failureMessage = ex.message
+                testCaseConfig.failureMessage = traceback.format_exc()
             finally:
                 testCaseInstance.tearDown()
                 self.saveTestResult(testCaseConfig)
@@ -171,7 +171,6 @@ class Runner:
                 testSuite = junit_xml.TestSuite(currTestCaseModuleName)
                 lstTestSuites.append(testSuite)
             testSuite.test_cases.append(testCase)
-        #print TestSuite.to_xml_string(lstTestSuites)
         #Write the xml content to result file
         with open(runResultDir + os.path.sep + 'JUnitResult.xml', 'w') as f:
             junit_xml.TestSuite.to_file(f, lstTestSuites)
